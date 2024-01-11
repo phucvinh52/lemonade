@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lemonade-command/lemonade/pkg/utils"
@@ -48,11 +50,29 @@ func main() {
 			m.Message = os.Args[2]
 		}
 
+		if _, exists := os.LookupEnv("TERMUX_VERSION"); exists {
+			cmd := exec.Command("termux-clipboard-set", m.Message)
+			cmd.Stdout = os.Stdout
+			cmd.Stdin = os.Stdin
+			cmd.Stderr = os.Stderr
+			cmd.WaitDelay = 2 * time.Second
+			cmd.Run()
+			return
+		}
 		err := utils.Post("http://"+bindIP+"/copy", m.toByte())
 		if err != nil {
 			panic(err)
 		}
 	case "paste":
+		if _, exists := os.LookupEnv("TERMUX_VERSION"); exists {
+			cmd := exec.Command("termux-clipboard-get")
+			cmd.Stdout = os.Stdout
+			cmd.Stdin = os.Stdin
+			cmd.Stderr = os.Stderr
+			cmd.WaitDelay = 2 * time.Second
+			cmd.Run()
+			return
+		}
 		result, err := utils.Get("http://" + bindIP + "/paste")
 		if err != nil {
 			panic(err)
@@ -83,7 +103,12 @@ func handleServe() {
 			log.Println(err)
 			return
 		}
-		log.Println(currentMessage)
+		cmd := exec.Command("termux-clipboard-set", currentMessage.Message)
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Stderr = os.Stderr
+		cmd.WaitDelay = 2 * time.Second
+		cmd.Run()
 
 	})
 	r.Run(bindIP) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
