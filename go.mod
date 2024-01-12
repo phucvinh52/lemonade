@@ -13,5 +13,6 @@ require (
 	github.com/monochromegane/conflag v0.0.0-20151130130520-6d68c9aa4183
 	github.com/pocke/go-iprange v0.0.0-20150823054938-08fbe355c365
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
+	golang.design/x/clipboard v0.7.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

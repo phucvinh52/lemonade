@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lemonade-command/lemonade/pkg/utils"
+	"golang.design/x/clipboard"
 )
 
 type MessageData struct {
@@ -28,6 +29,7 @@ var currentMessage MessageData
 var mlock sync.Mutex
 
 var bindIP = "127.0.0.1:1789"
+var clipboardDISPLAY = ""
 
 func main() {
 	if len(os.Args) < 2 {
@@ -58,6 +60,13 @@ func main() {
 			cmd.WaitDelay = 2 * time.Second
 			cmd.Run()
 			return
+		} else if _, exists := os.LookupEnv("DISPLAY"); exists {
+			err := clipboard.Init()
+			if err != nil {
+				panic(err)
+			}
+			clipboard.Write(clipboard.FmtText, []byte(m.Message))
+			return
 		}
 		err := utils.Post("http://"+bindIP+"/copy", m.toByte())
 		if err != nil {
@@ -71,6 +80,14 @@ func main() {
 			cmd.Stderr = os.Stderr
 			cmd.WaitDelay = 2 * time.Second
 			cmd.Run()
+			return
+		} else if _, exists := os.LookupEnv("DISPLAY"); exists {
+			err := clipboard.Init()
+			if err != nil {
+				panic(err)
+			}
+			mess := clipboard.Read(clipboard.FmtText)
+			fmt.Printf("%s", string(mess))
 			return
 		}
 		result, err := utils.Get("http://" + bindIP + "/paste")
