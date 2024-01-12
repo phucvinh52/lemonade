@@ -74,6 +74,15 @@ func main() {
 			cmd.Run()
 			return
 		}
+		// else if _, exists := os.LookupEnv("DISPLAY"); exists {
+		// 	err := clipboard.Init()
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
+		// 	mess := clipboard.Read(clipboard.FmtText)
+		// 	fmt.Printf("%s", string(mess))
+		// 	return
+		// }
 		result, err := utils.Get("http://" + bindIP + "/paste")
 		if err != nil {
 			panic(err)
